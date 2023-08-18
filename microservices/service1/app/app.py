@@ -1,44 +1,36 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
-
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import requests
-import os
 
 app = Flask(__name__)
+
+BUDGETING_FRONTEND_ALIAS = 'budgeting-frontend'  # Alias of Budgeting Frontend in docker-compose
+BUDGETING_FRONTEND_PORT = 5051  # Port exposed by Budgeting Frontend in docker-compose
+
 app.secret_key = 'thisisjustarandomstring'
 
+expenses = []
+categories = []
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
     if request.method == "POST":
-        if request.form['submit_button'] == 'Test connection':
-            ret = os.system('ping welcome-service -w 1')
-            if ret == 0:
-                flash('The test was successful', "green")
-                return redirect(url_for("test"))
-            else:
-                flash('The test failed. Welcome-service is not UP', "red")
-                return redirect(url_for("index"))
+        description = request.form['description']
+        amount = float(request.form['amount'])
+        category = request.form['category']
+        expenses.append({'description': description, 'amount': amount, 'category': category})
+    return render_template('index.html', expenses=expenses, categories=categories)
 
-        elif request.form['submit_button'] == 'Reset':
-            return redirect(url_for("index"))
-        else:
-            pass
-    return render_template('index.html')
+@app.route('/add_category', methods=['POST'])
+def add_category():
+    category_name = request.form['category_name']
+    categories.append(category_name)
+    return redirect(url_for('index'))
 
-
-@app.route('/test', methods=['POST', 'GET'])
-def test():
-    if request.method == "POST":
-        if request.form['submit_button'] == 'Reset':
-            return redirect(url_for("index"))
-        elif request.form['submit_button'] == 'Get Message':
-            data = requests.get('http://welcome-service:5051').json()
-            flash(str(data), "green")
-            return redirect(url_for('test'))
-        else:
-            pass
-    return render_template('test_service.html')
-
+@app.route('/goto_budgeting', methods=['GET'])
+def goto_budgeting():
+    budgeting_frontend_url = "http://budgeting-frontend:5051"
+    return redirect(budgeting_frontend_url)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5050, host="0.0.0.0")
+
