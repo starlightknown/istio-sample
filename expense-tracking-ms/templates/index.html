@@ -2,6 +2,56 @@
 <html>
 <head>
   <title>Expense Tracking Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .section {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
   <h1>Expense Tracking Service</h1>
@@ -16,6 +66,7 @@
   
   <h2>Expenses</h2>
   <ul id="expense-list"></ul>
+
   <!-- Category Management Section -->
   <div class="section">
     <h2 class="section-title">Category Management</h2>
@@ -25,44 +76,6 @@
       <button type="submit">Add Category</button>
     </form>
     <ul id="category-list"></ul>
-    <script>
-      const categoryForm = document.getElementById('category-form');
-      const categoryList = document.getElementById('category-list');
-
-      categoryForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const category = document.getElementById('category').value;
-
-        const response = await fetch('/categories', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ name: category })
-        });
-
-        if (response.ok) {
-          const newCategory = await response.json();
-          displayCategory(newCategory);
-          document.getElementById('category').value = '';
-        }
-      });
-
-      async function fetchCategories() {
-        const response = await fetch('/categories');
-        const categories = await response.json();
-        categories.forEach(displayCategory);
-      }
-
-      function displayCategory(category) {
-        const li = document.createElement('li');
-        li.textContent = `Category: ${category.name}`;
-        categoryList.appendChild(li);
-      }
-
-      fetchCategories();
-    </script>
   </div>
 
   <!-- Reporting Section -->
@@ -70,17 +83,58 @@
     <h2 class="section-title">Reporting</h2>
     <button id="generate-report-button">Generate Report</button>
     <div id="report-result"></div>
-    <script>
-      const generateReportButton = document.getElementById('generate-report-button');
-      const reportResult = document.getElementById('report-result');
-
-      generateReportButton.addEventListener('click', async () => {
-        const response = await fetch('/report');
-        const report = await response.json();
-        reportResult.textContent = `Total Expenses: $${report.total_expenses.toFixed(2)}`;
-      });
-    </script>
   </div>
+
+  <script>
+    const categoryForm = document.getElementById('category-form');
+    const categoryList = document.getElementById('category-list');
+
+    categoryForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const category = document.getElementById('category').value;
+
+      const response = await fetch('/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: category })
+      });
+
+      if (response.ok) {
+        const newCategory = await response.json();
+        displayCategory(newCategory);
+        document.getElementById('category').value = '';
+      }
+    });
+
+    async function fetchCategories() {
+      const response = await fetch('/categories');
+      const categories = await response.json();
+      categories.forEach(displayCategory);
+    }
+
+    function displayCategory(category) {
+      const li = document.createElement('li');
+      li.textContent = `Category: ${category.name}`;
+      categoryList.appendChild(li);
+    }
+
+    fetchCategories();
+  </script>
+
+  <script>
+    const generateReportButton = document.getElementById('generate-report-button');
+    const reportResult = document.getElementById('report-result');
+
+    generateReportButton.addEventListener('click', async () => {
+      const response = await fetch('/report');
+      const report = await response.json();
+      reportResult.textContent = `Total Expenses: $${report.total_expenses.toFixed(2)}`;
+    });
+  </script>
+
   <script>
     const expenseForm = document.getElementById('expense-form');
     const expenseList = document.getElementById('expense-list');
